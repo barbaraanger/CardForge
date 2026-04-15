@@ -1,5 +1,6 @@
 package com.barbaraanger.cardforge.user.infrastructure.persistence;
 
+import com.barbaraanger.cardforge.user.api.mapper.UserResponseMapper;
 import com.barbaraanger.cardforge.user.application.port.out.UserRepositoryPort;
 import com.barbaraanger.cardforge.user.domain.User;
 import com.barbaraanger.cardforge.user.infrastructure.persistence.entity.UserEntity;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserRepositoryAdapter implements UserRepositoryPort {
     private final SpringDataUserRepository springDataUserRepository;
+    private final UserResponseMapper userResponseMapper;
 
     @Override
     public User save(User user) {
@@ -23,11 +25,14 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
 
     @Override
     public Optional<User> findById(UUID id) {
-        return Optional.empty();
+        return springDataUserRepository.findById(id).map(UserEntity::toDomain);
     }
 
     @Override
     public boolean existsByEmail(String email) {
-        return false;
+        if (email == null) {
+            return false;
+        }
+        return springDataUserRepository.existsByEmail(email.trim());
     }
 }
